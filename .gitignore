@@ -32,6 +32,10 @@
 *.cof
 *.hex
 *.map
+*.mcp
+*.mcs
+*.mcw
+*.err
 
 
 # Debug files
