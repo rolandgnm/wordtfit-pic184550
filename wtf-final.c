@@ -5,16 +5,18 @@
 
 #include <p18f4550.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define NUM_MAX_BLOCOS_MEM 10
 #define NUM_MAX_PROCESSOS 30
 #define Max 15
 #define numElementos 12
-#define NUM_ALGARISMOS 5
+#define MAX_INPUT 5
+#define CRLF "\r\n" 
 
 char *dado;
-int i;
-char msg[5];
+int i,a,b,c;
+char msg[MAX_INPUT];
 
 char dadoAux;
 
@@ -89,117 +91,47 @@ void putf(char *X, int L)
 	}
 }
 
+int getInt(){
+	i=0;
+	while(i<MAX_INPUT){
+			if(PIR1bits.RCIF){				//Checa se foi registrador foi carregado
+				PIR1bits.RCIF = 0;			//Reinicializa Flag de recebimento
+				*dado = RCREG;				//Recebe dado
+				if((char) *dado == 0x0D){ 	//Checa se � Enter
+					puts(CRLF);				//quebra linha
+					break;					//para iteracao
+				} else {
+				msg[i++] = *dado;			//Poe na string para ser convertido
+				putc(*dado);				//imprime
+				numeroLido = atoi(msg);		//imprime
+				}
+	 		}
+	
+		}
+	return numeroLido;
+}
+
 
 void main()
 {
+	
+
 	initEUSART();
      while(1){
-	 	while(i<NUM_ALGARISMOS){
-			if(PIR1bits.RCIF){
-				PIR1bits.RCIF = 0;	
-				*dado = RCREG ;
-				msg[i++] = *dado;
-				puts("dskjfhdsfdskj\r\nfjk      d");
-				numeroLido = atoi(msg);
-	 		}
-		}
+		puts("Insira um numero: ");
+		a = getInt();
+
+		puts("\nInsira outro numero: ");
+		b = getInt();
 		
+		c= a + b;
+		itoa(c, msg);
+		puts(msg);
+		puts(CRLF);
+	
+	
 	 } 
+
  
-	  
-
-/*
-
-    BlocoMem vBlocoMem[NUM_MAX_BLOCOS_MEM];
-    int tamProcessos[NUM_MAX_PROCESSOS],
-        i,j,
-        numBlocos,
-        numProcessos,
-        tamTodosBlocos,
-        tamTodosProcessos;
-
-    printf("\n\tAlocacao de Memoria - Worst Fit\n\n");
-
-//TODO: Area de entrada de dados
-    printf("Entre com o Numero de Processos(Se > 5, em LOTE !!!):");
-    //scanf("%d",&numProcessos);
-    numProcessos = 10;
-
-    printf("Entre com o Numero de Blocos:");
-    //scanf("%d",&numBlocos);
-    numBlocos = 10;
-
-    //TODO: Condicional que define o modo de tratamento:
-    if(numProcessos <= 5) {
-        //até 5 Processos definindo as condicoes de cada parte,
-        printf("Entre com o tamanho dos Processos:\n");
-        for(i=0;i<numProcessos;i++) {
-            printf("Processo %d:",i+1);
-            //scanf("%d",&tamProcessos[i]);}
-}
-
-        printf("Entre com o tamanho dos Blocos:\n");
-        for(i=0;i<numBlocos;i++) {
-            printf("Bloco %d:",i+1);
-            //scanf("%d",&vBlocoMem[i].tamanho);
-            vBlocoMem[i].id = i+1;
-        }
-
-    } else {
-        //ou em lote, definindo os tamanhos para todos.
-        printf("Entre com um tamanho para TODOS os Processos:");
-        //scanf("%d",&tamTodosProcessos);
-        tamTodosProcessos = 10;
-
-        for(i=0;i<numProcessos;i++) tamProcessos[i] = tamTodosProcessos;
-
-        printf("Entre com um tamanho para TODOS os blocos:");
-        //scanf("%d",&tamTodosBlocos);
-        tamTodosBlocos = 20;
-        for(i=0;i<numBlocos;i++) {
-            vBlocoMem[i].tamanho = tamTodosBlocos;
-            vBlocoMem[i].id = i+1;
-        }
-
-    }
-//Fim de area de entrada de dados
-
-    //TODO: Ordenação inicial da memória
-    ordenar(vBlocoMem, numBlocos);
-    //Imprime cabecalho da lista output.
-    printf("\nID Processo:\t Tamanho:\t ID Bloco:\tEspaco no Bloco:\tEspaco Restante:\n");
-
-//TODO: Regiao critica.
-//    Para cada processo.
-    for(i=0;i<numProcessos;i++) {
-
-        //Varre vetor de blocos de memória ordenado descrescentemente
-        for(j=0;j<numBlocos;j++) {
-
-            //Ha espaco?
-            if(vBlocoMem[j].tamanho >= tamProcessos[i]){
-                //Imprime linha output
-                printf("\t%d\t\t\t\t%d\t\t\t%d\t\t\t%d\t\t\t\t\t%d\n",i+1, tamProcessos[i], vBlocoMem[j].id, vBlocoMem[j].tamanho,
-                       (vBlocoMem[j].tamanho - tamProcessos[i]));
-                //Registra alteracao no tamanho do bloco
-                vBlocoMem[j].tamanho -= tamProcessos[i];
-
-                //TODO: Reordena o vetor de BlocosMem.
-                ordenar(vBlocoMem,numBlocos);
-                break;
-            }
-        }
-        //Espaco nao encontrado
-        if(j == numBlocos){
-            printf("\t%d\t\t\t\t%d\t IMPOSSIVEL ALOCAR\n",i+1, tamProcessos[i]);
-        }
-    }
-//FIM de regiao critica
-
-    //encerra sw
-    printf("\n");
-    //getchar();
-    return(0);
-*/
 
 }
