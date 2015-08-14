@@ -27,6 +27,7 @@
 #define TAM_NUM 5
 #define CRLF "\r\n"
 
+
 //TODO:Define tipo de dado (4b)
 struct BlocosDeMemoria {
 int id;
@@ -118,7 +119,7 @@ const rom char tamKdProcesso[] = "Entre com o tamanho dos Processos:";
 const rom char tamKdBloco[] = "Entre com o tamanho dos Blocos:";
 const rom char processo[] = "Processo";
 const rom char bloco[] = "Bloco";
-const rom char cabecalho[] = "ID Processo:     Tamanho:     ID Bloco:     Espaco no Bloco:     Espaco Restante:";
+const rom char cabecalho[] = "ID Processo:     Tamanho:     ID Bloco:     Espaco no Bloco:     Espaco Restante:\r\n";
 const rom char t[] = "     ";
 const rom char n[] = CRLF;
 const rom char impossivel[] = " IMPOSSIVEL ALOCAR";
@@ -304,68 +305,47 @@ void main(void)
     printf("%S", msgTodosProcessos);
     while(BusyUSART());
 
-    
+    tamTodosProcessosi = getInt();
 
-    while(!DataRdyUSART());
-    getsUSART(tamTodosProcessos, TAM_NUM);
-    putsUSART(tamTodosProcessos);
-
-	//Convers�o do x buscado para um valor int
-	tamTodosProcessosi = atoi(tamTodosProcessos);
+    printf("%S", CRLF); //new line
+    while(BusyUSART());
 
 
+    printf("%S", msgTodosBlocos);
+    while(BusyUSART());
 
-    putsUSART(msgTodosBlocos);
-
-	while(!DataRdyUSART());
-	getsUSART(tamTodosBlocos, TAM_NUM);
-	putsUSART(tamTodosBlocos);
-
-	//Convers�o do x buscado para um valor int
-	tamTodosBlocosi = atoi(tamTodosBlocos);
+    tamTodosBlocosi = getInt();
 
     } else {
 
          //at� 5 Processos definindo as condicoes de cada parte,
 
 
-        putsUSART(tamKdProcesso);
+        printf("%S", tamKdProcesso);
+        while(BusyUSART());
 
         for(i=0;i<iNumProcessos;i++) {
-            putsUSART(processo);
-            valor[0] = i + 1 + '0'; //Convers�o INT para CHAR
-            putsUSART(valor);
+            printf("%S %d",processo, i+1);
+            while(BusyUSART());
 
-            while(!DataRdyUSART());
-	        getsUSART(valor, 1);
-	        putsUSART(valor);
-
-            tamProcessos[i] = atoi(valor);
+            tamProcessos[i] = getInt();
         }
 
-        putsUSART(tamKdBloco);
-
-
+        printf("%S",tamKdBloco);
 
 
         for(i=0;i<iNumBlocos;i++) {
 
-            putsUSART(bloco);
-            valor2[0] = i + 1 + '0'; //Convers�o INT para CHAR
-            putsUSART(valor2);
+            printf("%S %d",bloco, i+1);
 
-            while(!DataRdyUSART());
-	        getsUSART(valor2, 1);
-	        putsUSART(valor2);
-
-            vBlocoMem[i].tamanho = atoi(valor2);
+            vBlocoMem[i].tamanho = getInt();
             vBlocoMem[i].id = i+1;
         }
     }
 
     ordenar(vBlocoMem, iNumBlocos);
 
-    putsUSART(cabecalho);
+    printf("%S", cabecalho);
 
     for(i=0;i<iNumProcessos;i++) {
 
@@ -376,42 +356,8 @@ void main(void)
             if(vBlocoMem[j].tamanho >= tamProcessos[i]){
                 //Imprime linha output
 
-                putsUSART(t);
-
-                itoa(i+1,valor3);
-                putsUSART(valor3);
-
-                putsUSART(t);
-                putsUSART(t);
-                putsUSART(t);
-                putsUSART(t);
-
-                itoa(tamProcessos[i],valor3);
-                putsUSART(valor3);
-
-                putsUSART(t);
-                putsUSART(t);
-                putsUSART(t);
-
-                itoa(vBlocoMem[j].id,valor3);
-                putsUSART(valor3);
-
-                putsUSART(t);
-                putsUSART(t);
-                putsUSART(t);
-
-               itoa(vBlocoMem[j].tamanho,valor3);
-                putsUSART(valor3);
-
-                putsUSART(t);
-                putsUSART(t);
-                putsUSART(t);
-                putsUSART(t);
-                putsUSART(t);
-
-               itoa(vBlocoMem[j].tamanho - tamProcessos[i],valor3);
-                putsUSART(valor3);
-
+                printf("     %d                    %d               %d               %d                         %d\r\n",i+1, tamProcessos[i], vBlocoMem[j].id, vBlocoMem[j].tamanho,
+                       (vBlocoMem[j].tamanho - tamProcessos[i]));
                 //Registra alteracao no tamanho do bloco
                 vBlocoMem[j].tamanho -= tamProcessos[i];
 
@@ -423,25 +369,10 @@ void main(void)
         //Espaco nao encontrado
         if(j == iNumBlocos){
 
-            putsUSART(t);
-
-            itoa(i+1,valor3);
-            putsUSART(valor3);
-
-            putsUSART(t);
-            putsUSART(t);
-            putsUSART(t);
-            putsUSART(t);
-
-            itoa(tamProcessos[i],valor3);
-            putsUSART(valor3);
-
-            putsUSART(impossivel);
-
-            putsUSART(n);
+          printf("     %d                    %d      IMPOSSIVEL ALOCAR\n",i+1, tamProcessos[i]);
         }
     }
-
+        printf("\r\n\r\n\r\n" );
         return(0);
 
 }
