@@ -1,15 +1,13 @@
-/*Algoritmo Interpolação de Lagrange*/
+//###          Agosto/2015
+//### SEMB1 - Codigo executado no ARM9 linux
+//### Dupla: Franklin e Roland Gabriel
+//###
 #include <p18f4550.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <usart.h>
 #include <string.h>
 
-
-/*-------------------------------------
-* Bits de configura��o do PIC18F4550
-*--------------------------------------*/
-// Oscilador e outras definicoes de registradores
 #pragma config FOSC     = HS     // (8 MHz)
 #pragma config IESO     = OFF
 #pragma config PWRT     = OFF
@@ -27,20 +25,28 @@
 #define TAM_NUM 5
 #define CRLF "\r\n"
 
-    struct BlocosDeMemoria {
-    int id;
-    int tamanho;
-    } typedef BlocoMem;
+//TODO:Define tipo de dado (4b)
+struct BlocosDeMemoria {
+int id;
+int tamanho;
+} typedef BlocoMem;
 
-//TOTAL 1200
+//TODO:Cria vetor de BlocoMem no setor configurado no Linker
+// #pragma romdata DADOS_ROM
+//
+// #pragma romdata
+
+
+
+//TOTAL 1200                      TODO:PROVISORIO
 #pragma udata DADOS_U
     int tamProcessos[100];
     BlocoMem vBlocoMem[100];
 #pragma udata
 
+
 #pragma udata accessram //setor de acesso rapido (96B)
     int i;
-
     //variaveis para ler e escrever na serial
     unsigned char cbuffer;
     unsigned char sbuffer[TAM_NUM];
@@ -48,22 +54,20 @@
 #pragma udata
 //int *p = tamProcessos;
 
-//TOTAL 424
-//#pragma idata
-    char rom msgInicial[41] = "\n\tAlocacao de Memoria - Worst Fit\n\n\0";
-  	char rom msgNumProcessos[56] = "Entre com o Numero de Processos(Se > 5, em LOTE !!!): \0";
-    char rom msgNumBlocos[33] = "\nEntre com o Numero de Blocos: \0";
-  	char rom msgTodosProcessos[50] = "\nEntre com um tamanho para TODOS os Processos: \0";
-    char rom msgTodosBlocos[47] = "\nEntre com um tamanho para TODOS os Blocos: \0";
-    char rom tamKdProcesso[38] = "Entre com o tamanho dos Processos:\n\0";
-    char rom tamKdBloco[35] = "Entre com o tamanho dos Blocos:\n\0";
-    char rom processo[11] = "Processo \0";
-    char rom bloco[8] = "Bloco \0";
-    char rom cabecalho[77] = "\nID Processo:\t Tamanho:\t ID Bloco:\tEspaco no Bloco:\tEspaco Restante:\n\0";
-    char rom t[4] = "\t\0";
-    char rom n[4] = "\n\0";
-    char rom impossivel[20] = " IMPOSSIVEL ALOCAR\0";
-  //#pragma idata
+//TODO:Armazena Strings em memoria de programa
+const rom char msgInicial[] = "###   Alocacao de Memoria - Worst Fit   ###";
+const rom char msgNumProcessos[] = "Entre com o Numero de Processos(Se > 5, em LOTE !!!): ";
+const rom char msgNumBlocos[] = "Entre com o Numero de Blocos: ";
+const rom char msgTodosProcessos[] = "Entre com um tamanho para TODOS os Processos: ";
+const rom char msgTodosBlocos[] = "Entre com um tamanho para TODOS os Blocos: ";
+const rom char tamKdProcesso[] = "Entre com o tamanho dos Processos:";
+const rom char tamKdBloco[] = "Entre com o tamanho dos Blocos:";
+const rom char processo[] = "Processo";
+const rom char bloco[] = "Bloco";
+const rom char cabecalho[] = "ID Processo:     Tamanho:     ID Bloco:     Espaco no Bloco:     Espaco Restante:";
+const rom char t[] = "     ";
+const rom char n[] = CRLF;
+const rom char impossivel[] = " IMPOSSIVEL ALOCAR";
 
 
 
@@ -174,18 +178,17 @@ const rom float y[VETOR_PRINCIPAL] =
 #pragma romdata
 /*******/
 
-/*Prot�tipo de fun��es*/
+
 void inicializarSerial(void);
 void ordenar(BlocoMem *vetorMem, int numBlocos);
-int getInt();                                     //Funcao facilita leitura de inteiros
+int getInt();   //Facilita leitura de inteiros a partir da USART
 
-/******/
 void main(void)
 {
 
 
-    int numProcessosi = 0;
-    int numBlocosi = 0;
+    int iNumProcessos = 0;
+    int iNumBlocos = 0;
     int tamTodosProcessosi = 0;
     int tamTodosBlocosi = 0;
 
@@ -197,9 +200,9 @@ void main(void)
     char tamTodosProcessos[TAM_NUM];
     char tamTodosBlocos[TAM_NUM];
 
-    char valor[5] = "   \0";
-    char valor2[5] = "   \0";
-    char valor3[5] = "   \0";
+    char valor[5] = "   ";
+    char valor2[5] = "   ";
+    char valor3[5] = "   ";
 
 
 
@@ -211,17 +214,19 @@ void main(void)
   while(BusyUSART());
 
   //TODO:USART in -> Le numero de Processos
-	numProcessosi = getInt();
+	iNumProcessos = getInt();
 
   //TODO:USART out -> mensagem / in-> numero de BlocosDeMemoria
   printf("%S",msgNumBlocos);
   while(BusyUSART());
-  numBlocosi = getInt();
+  iNumBlocos = getInt();
 
 
-  if(numProcessosi > 5) {
+  if(iNumProcessos > 5) {
 
-    putsUSART(msgTodosProcessos);
+    printf("%S", msgTodosProcessos);
+    while(BusyUSART());
+
     while(!DataRdyUSART());
     getsUSART(tamTodosProcessos, TAM_NUM);
     putsUSART(tamTodosProcessos);
@@ -247,7 +252,7 @@ void main(void)
 
         putsUSART(tamKdProcesso);
 
-        for(i=0;i<numProcessosi;i++) {
+        for(i=0;i<iNumProcessos;i++) {
             putsUSART(processo);
             valor[0] = i + 1 + '0'; //Convers�o INT para CHAR
             putsUSART(valor);
@@ -264,7 +269,7 @@ void main(void)
 
 
 
-        for(i=0;i<numBlocosi;i++) {
+        for(i=0;i<iNumBlocos;i++) {
 
             putsUSART(bloco);
             valor2[0] = i + 1 + '0'; //Convers�o INT para CHAR
@@ -279,14 +284,14 @@ void main(void)
         }
     }
 
-    ordenar(vBlocoMem, numBlocosi);
+    ordenar(vBlocoMem, iNumBlocos);
 
     putsUSART(cabecalho);
 
-    for(i=0;i<numProcessosi;i++) {
+    for(i=0;i<iNumProcessos;i++) {
 
         //Varre vetor de blocos de mem�ria ordenado descrescentemente
-        for(j=0;j<numBlocosi;j++) {
+        for(j=0;j<iNumBlocos;j++) {
 
             //Ha espaco?
             if(vBlocoMem[j].tamanho >= tamProcessos[i]){
@@ -337,7 +342,7 @@ void main(void)
             }
         }
         //Espaco nao encontrado
-        if(j == numBlocosi){
+        if(j == iNumBlocos){
 
             putsUSART(t);
 
@@ -359,125 +364,11 @@ void main(void)
     }
 
         return(0);
-
-
-
-
-
-/*
-
- //###          Agosto/2015
-//### SEMB1 - Codigo executado no ARM9 linux
-//### Dupla: Franklin e Roland Gabriel
-//###
-
-#include <stdio.h>
-#define NUM_MAX_BLOCOS_MEM 1000
-#define NUM_MAX_PROCESSOS 3000
-
-//Define tipo de dado.
-struct BlocosDeMemoria {
-    int id;
-    int tamanho;
-} typedef BlocoMem;
-
-
-int main()
-{
-
-    BlocoMem vBlocoMem[NUM_MAX_BLOCOS_MEM];
-    int tamProcessos[NUM_MAX_PROCESSOS],
-        i,j,
-        numBlocos,
-        numProcessos,
-        tamTodosBlocos,
-        tamTodosProcessos;
-
-    printf("\n\tAlocacao de Memoria - Worst Fit\n\n");
-
-//TODO: Area de entrada de dados
-    printf("Entre com o Numero de Processos(Se > 5, em LOTE !!!):");
-    scanf("%d",&numProcessos);
-
-    printf("Entre com o Numero de Blocos:");
-    scanf("%d",&numBlocos);
-
-    //TODO: Condicional que define o modo de tratamento:
-    if(numProcessos <= 5) {
-        //at� 5 Processos definindo as condicoes de cada parte,
-        printf("Entre com o tamanho dos Processos:\n");
-        for(i=0;i<numProcessos;i++) {
-            printf("Processo %d:",i+1);
-            scanf("%d",&tamProcessos[i]);}
-
-        printf("Entre com o tamanho dos Blocos:\n");
-        for(i=0;i<numBlocos;i++) {
-            printf("Bloco %d:",i+1);
-            scanf("%d",&vBlocoMem[i].tamanho);
-            vBlocoMem[i].id = i+1;
-        }
-
-    } else {
-        //ou em lote, definindo os tamanhos para todos.
-        printf("Entre com um tamanho para TODOS os Processos:");
-        scanf("%d",&tamTodosProcessos);
-        for(i=0;i<numProcessos;i++) tamProcessos[i] = tamTodosProcessos;
-
-        printf("Entre com um tamanho para TODOS os blocos:");
-        scanf("%d",&tamTodosBlocos);
-        for(i=0;i<numBlocos;i++) {
-            vBlocoMem[i].tamanho = tamTodosBlocos;
-            vBlocoMem[i].id = i+1;
-        }
-
-    }
-//Fim de area de entrada de dados
-
-    //TODO: Ordena��o inicial da mem�ria
-    ordenar(vBlocoMem, numBlocos);
-    //Imprime cabecalho da lista output.
-    printf("\nID Processo:\t Tamanho:\t ID Bloco:\tEspaco no Bloco:\tEspaco Restante:\n");
-
-//TODO: Regiao critica.
-//    Para cada processo.
-    for(i=0;i<numProcessos;i++) {
-
-        //Varre vetor de blocos de mem�ria ordenado descrescentemente
-        for(j=0;j<numBlocos;j++) {
-
-            //Ha espaco?
-            if(vBlocoMem[j].tamanho >= tamProcessos[i]){
-                //Imprime linha output
-                printf("\t%d\t\t\t\t%d\t\t\t%d\t\t\t%d\t\t\t\t\t%d\n",i+1, tamProcessos[i], vBlocoMem[j].id, vBlocoMem[j].tamanho,
-                       (vBlocoMem[j].tamanho - tamProcessos[i]));
-                //Registra alteracao no tamanho do bloco
-                vBlocoMem[j].tamanho -= tamProcessos[i];
-
-                //TODO: Reordena o vetor de BlocosMem.
-                ordenar(vBlocoMem,numBlocos);
-                break;
-            }
-        }
-        //Espaco nao encontrado
-        if(j == numBlocos){
-            printf("\t%d\t\t\t\t%d\t IMPOSSIVEL ALOCAR\n",i+1, tamProcessos[i]);
-        }
-    }
-//FIM de regiao critica
-
-    //encerra sw
-    printf("\n");
-    getchar();
-    return(0);
-
-}
-
- */
-
+        
 }
 /*******/
 
-/*Configura e habilita a comunica��o serial*/
+//TODO:Configura USART
 void inicializarSerial()
 {
 	RCSTAbits.SPEN = 1;
@@ -493,8 +384,8 @@ void inicializarSerial()
 				USART_CONT_RX &
 				USART_BRGH_HIGH,51);
 }
-/******/
 
+//TODO: Metodo de Ordenacao
 void ordenar(BlocoMem *vetorMem, int numBlocos) {
     int i,j;
     for (i = 0; i < numBlocos; i++) {
