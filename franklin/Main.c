@@ -7,9 +7,9 @@
 
 
 /*-------------------------------------
-* Bits de configuração do PIC18F4550 
+* Bits de configuraï¿½ï¿½o do PIC18F4550
 *--------------------------------------*/
-// Oscilador e outras definicoes de registradores	
+// Oscilador e outras definicoes de registradores
 #pragma config FOSC     = HS     // (8 MHz)
 #pragma config IESO     = OFF
 #pragma config PWRT     = OFF
@@ -25,43 +25,52 @@
 #define VETOR_PRINCIPAL 384
 #define VETOR_AUXILIAR 6
 #define TAM_NUM 5
+#define CRLF "\r\n"
 
     struct BlocosDeMemoria {
     int id;
     int tamanho;
     } typedef BlocoMem;
-    
-    //TOTAL 1200
-#pragma udata DADOS_U   
+
+//TOTAL 1200
+#pragma udata DADOS_U
     int tamProcessos[100];
     BlocoMem vBlocoMem[100];
 #pragma udata
 
-//int *p = tamProcessos;    
+#pragma udata accessram //setor de acesso rapido (96B)
+    int i;
 
-//TOTAL 424    
+    //variaveis para ler e escrever na serial
+    unsigned char cbuffer;
+    unsigned char sbuffer[TAM_NUM];
+
+#pragma udata
+//int *p = tamProcessos;
+
+//TOTAL 424
 //#pragma idata
     char rom msgInicial[41] = "\n\tAlocacao de Memoria - Worst Fit\n\n\0";
-	char rom msgNumProcessos[56] = "Entre com o Numero de Processos(Se > 5, em LOTE !!!): \0";
+  	char rom msgNumProcessos[56] = "Entre com o Numero de Processos(Se > 5, em LOTE !!!): \0";
     char rom msgNumBlocos[33] = "\nEntre com o Numero de Blocos: \0";
-	char rom msgTodosProcessos[50] = "\nEntre com um tamanho para TODOS os Processos: \0";
-    char rom msgTodosBlocos[47] = "\nEntre com um tamanho para TODOS os Blocos: \0";    
-    char rom tamKdProcesso[38] = "Entre com o tamanho dos Processos:\n\0";    
-    char rom tamKdBloco[35] = "Entre com o tamanho dos Blocos:\n\0";    
+  	char rom msgTodosProcessos[50] = "\nEntre com um tamanho para TODOS os Processos: \0";
+    char rom msgTodosBlocos[47] = "\nEntre com um tamanho para TODOS os Blocos: \0";
+    char rom tamKdProcesso[38] = "Entre com o tamanho dos Processos:\n\0";
+    char rom tamKdBloco[35] = "Entre com o tamanho dos Blocos:\n\0";
     char rom processo[11] = "Processo \0";
-    char rom bloco[8] = "Bloco \0";    
+    char rom bloco[8] = "Bloco \0";
     char rom cabecalho[77] = "\nID Processo:\t Tamanho:\t ID Bloco:\tEspaco no Bloco:\tEspaco Restante:\n\0";
     char rom t[4] = "\t\0";
-    char rom n[4] = "\n\0";   
+    char rom n[4] = "\n\0";
     char rom impossivel[20] = " IMPOSSIVEL ALOCAR\0";
-//#pragma idata  
-    
-    
+  //#pragma idata
 
-/*Área que define o tamanho de memória alocada para os vetores iniciais*/
+
+
+/*ï¿½rea que define o tamanho de memï¿½ria alocada para os vetores iniciais*/
 /*
-#pragma romdata DATAX 
-const rom float x[VETOR_PRINCIPAL] = 
+#pragma romdata DATAX
+const rom float x[VETOR_PRINCIPAL] =
 		   {0.,1.,2.,3.,4.,5.,6.,7.,8.,9.,10.,11.,12.,
 			13.,14.,15.,16.,17.,18.,19.,20.,21.,22.,23.,24.,
 			25.,26.,27.,28.,29.,30.,31.,32.,33.,34.,35.,36.,
@@ -96,8 +105,8 @@ const rom float x[VETOR_PRINCIPAL] =
 			373.,374.,375.,376.,377.,378.,379.,380.,381.,382.,383.};
 #pragma romdata
 
-#pragma romdata DATAY 
-const rom float y[VETOR_PRINCIPAL] = 
+#pragma romdata DATAY
+const rom float y[VETOR_PRINCIPAL] =
 		    {3.70439,3.78823,1.33636,4.94159,1.18643,82.71557,
 	        99.54162,77.81941,91.74496,58.02974,57.54860,43.43887,
 	        64.60021,46.32540,49.72529,67.42367,35.20597,55.19687,
@@ -108,228 +117,245 @@ const rom float y[VETOR_PRINCIPAL] =
 	        113.22461,72.55680,117.20805,25.11175,42.54589,58.46992,
 			1.09326,2.12933,3.42153,1.63076,3.04914,117.26584,
 			66.31967,84.18746,117.86518,36.82274,62.73909,48.36075,
-			68.22959,54.69229,60.98038,40.81870,53.81025,46.42337,	        
-			73.22207,89.04848,113.55361,49.75285,58.94000,57.21378,	        
-			1.49209,2.52826,2.92159,1.99546,2.90504,92.88083,				        
-			66.59077,70.62356,90.94414,44.58142,56.31236,36.64184,				        
-			49.74453,63.79418,46.95276,44.05808,49.39597,69.07668,				        
-			84.39739, 83.36733,117.15848,46.46170,56.54927,50.07679,				       
-			8.78674, 4.76208,1.87580,8.93194,9.84913,79.72916,				       
-			80.67797,1.02911,105.97831,42.24153,45.80032,39.11855,				        
-			46.98218,64.73236,47.50777,47.50120,61.31783,59.82965,				        
-			97.01690,92.86451,100.03872,53.47676,45.08257,40.29724,				        
-			1.17818,2.28851,7.21012,2.08823,9.92795,114.70823,				        
-			89.52983,110.87244,80.88866,42.76993,41.59173,69.31875,				        
-			69.13236,55.68271,46.29440,52.00012,47.97056,62.00336,				        
-			103.73257,115.46924,70.50487,45.30505,31.63784,49.24166,				        
-			1.54520,5.55203,8.52763,4.22529,6.88590,107.00053,				        
-			77.90802,104.15741,77.07306,46.26307,47.90226,47.42976,				        
-			46.70043,63.77651,69.04682,41.49764,66.46166,57.14738,				        
-			118.08252,91.12425,111.00932,32.71311,44.28337,34.93989,				        
-			2.04520,6.20479,1.17515,2.73232,2.68511,75.58591,				        
-			106.59347,77.05086,102.13579,54.87944,60.72788,60.48774,				        
-			51.13307,62.05659,52.41536,55.48826,44.51350,63.96906,				        
-			112.54468, 67.53957,71.60108,30.53714,39.82132,27.04641,				       
-			2.98750,3.32024,2.54505,3.50361,5.90335,91.01019,				        
-			70.75974,65.80628,110.94266,53.51937,69.78840,40.05870,				        
-			56.02625,64.87466,59.89761,36.39665,48.05514,56.34986,				        
-			112.66951,66.20389,84.20279,40.28365,41.40094,53.86164,				        
-			3.55556,9.64141,3.90208,8.42668,1.36501,102.50847,	        
-			111.33002,102.12837,73.88463,58.22661,56.09830,35.21822,				        
-			69.89594,64.04078,66.50324,45.18126,39.00801,42.52164,				        
-			74.58013,68.88247,94.31696,29.33126,50.39574,41.80056,				        
-			3.40995,8.30611,9.80945,5.02518,2.65476,95.65513,				        
-			67.89477,66.97169,77.65441,45.20685,64.18325,60.70318,				        
-			63.15490,67.43899,57.47517,66.36837,67.48319,49.78987,				        
-			119.10328,101.65764,101.82969,29.75412,43.79614,27.15478,				        
-			1.22403,9.30839,4.00674,3.92754,3.11514,114.42311,				        
-			115.10536,111.69593,88.45974,50.51457,51.66247,46.71994,				        
-			47.16158,50.54379,53.86872,45.68879,47.99086,35.79056,				        
+			68.22959,54.69229,60.98038,40.81870,53.81025,46.42337,
+			73.22207,89.04848,113.55361,49.75285,58.94000,57.21378,
+			1.49209,2.52826,2.92159,1.99546,2.90504,92.88083,
+			66.59077,70.62356,90.94414,44.58142,56.31236,36.64184,
+			49.74453,63.79418,46.95276,44.05808,49.39597,69.07668,
+			84.39739, 83.36733,117.15848,46.46170,56.54927,50.07679,
+			8.78674, 4.76208,1.87580,8.93194,9.84913,79.72916,
+			80.67797,1.02911,105.97831,42.24153,45.80032,39.11855,
+			46.98218,64.73236,47.50777,47.50120,61.31783,59.82965,
+			97.01690,92.86451,100.03872,53.47676,45.08257,40.29724,
+			1.17818,2.28851,7.21012,2.08823,9.92795,114.70823,
+			89.52983,110.87244,80.88866,42.76993,41.59173,69.31875,
+			69.13236,55.68271,46.29440,52.00012,47.97056,62.00336,
+			103.73257,115.46924,70.50487,45.30505,31.63784,49.24166,
+			1.54520,5.55203,8.52763,4.22529,6.88590,107.00053,
+			77.90802,104.15741,77.07306,46.26307,47.90226,47.42976,
+			46.70043,63.77651,69.04682,41.49764,66.46166,57.14738,
+			118.08252,91.12425,111.00932,32.71311,44.28337,34.93989,
+			2.04520,6.20479,1.17515,2.73232,2.68511,75.58591,
+			106.59347,77.05086,102.13579,54.87944,60.72788,60.48774,
+			51.13307,62.05659,52.41536,55.48826,44.51350,63.96906,
+			112.54468, 67.53957,71.60108,30.53714,39.82132,27.04641,
+			2.98750,3.32024,2.54505,3.50361,5.90335,91.01019,
+			70.75974,65.80628,110.94266,53.51937,69.78840,40.05870,
+			56.02625,64.87466,59.89761,36.39665,48.05514,56.34986,
+			112.66951,66.20389,84.20279,40.28365,41.40094,53.86164,
+			3.55556,9.64141,3.90208,8.42668,1.36501,102.50847,
+			111.33002,102.12837,73.88463,58.22661,56.09830,35.21822,
+			69.89594,64.04078,66.50324,45.18126,39.00801,42.52164,
+			74.58013,68.88247,94.31696,29.33126,50.39574,41.80056,
+			3.40995,8.30611,9.80945,5.02518,2.65476,95.65513,
+			67.89477,66.97169,77.65441,45.20685,64.18325,60.70318,
+			63.15490,67.43899,57.47517,66.36837,67.48319,49.78987,
+			119.10328,101.65764,101.82969,29.75412,43.79614,27.15478,
+			1.22403,9.30839,4.00674,3.92754,3.11514,114.42311,
+			115.10536,111.69593,88.45974,50.51457,51.66247,46.71994,
+			47.16158,50.54379,53.86872,45.68879,47.99086,35.79056,
 			73.62137,104.34571,68.27064,44.87873,44.49204,29.28443,
-			9.94917,8.16451,9.42947,2.30429,1.77931,67.45271,				        
-			106.01536,93.56141,106.33993,66.82969,35.74610,56.75425,				        
-			48.49634,65.21591,65.36423,51.23599,63.90016,64.44303,				        
-			95.37784,98.56479,104.30943,54.15159,33.92579,30.10237,				        
-			5.31589,3.91944,7.41518,7.37179,6.07273,68.66767,				        
-			98.28917,100.24173,75.07158,41.10486,54.08275,40.73027,				        
-			58.22124,47.71185,45.26840,35.63875,66.29298,68.56731,				        
-			79.94481,118.23518,66.88661,46.40015,36.85682,36.63649,				        
-			5.43684,8.012005,6.76342,5.54881,6.93289,76.49527,				        
-			88.30664,71.13927,96.47198,62.74221,35.22243,54.33807,				        
-			64.29392,48.91301,53.03774,38.65431,45.65192,65.36231,				        
-			93.98323,96.13746,97.57894,52.11006,47.51148,29.04268,				        
-			8.56982,7.66494,8.84172,8.35864,1.97540,115.98692,				        
-			101.22980,108.11245,73.97923,65.44365,45.23138,65.16940,				        
-			62.92194,64.81122,63.68278,56.49815,36.33445,61.74986,				        
+			9.94917,8.16451,9.42947,2.30429,1.77931,67.45271,
+			106.01536,93.56141,106.33993,66.82969,35.74610,56.75425,
+			48.49634,65.21591,65.36423,51.23599,63.90016,64.44303,
+			95.37784,98.56479,104.30943,54.15159,33.92579,30.10237,
+			5.31589,3.91944,7.41518,7.37179,6.07273,68.66767,
+			98.28917,100.24173,75.07158,41.10486,54.08275,40.73027,
+			58.22124,47.71185,45.26840,35.63875,66.29298,68.56731,
+			79.94481,118.23518,66.88661,46.40015,36.85682,36.63649,
+			5.43684,8.012005,6.76342,5.54881,6.93289,76.49527,
+			88.30664,71.13927,96.47198,62.74221,35.22243,54.33807,
+			64.29392,48.91301,53.03774,38.65431,45.65192,65.36231,
+			93.98323,96.13746,97.57894,52.11006,47.51148,29.04268,
+			8.56982,7.66494,8.84172,8.35864,1.97540,115.98692,
+			101.22980,108.11245,73.97923,65.44365,45.23138,65.16940,
+			62.92194,64.81122,63.68278,56.49815,36.33445,61.74986,
 			118.60826,92.55926,104.31152,29.65341,33.93534,42.28892};
 #pragma romdata
 /*******/
-    
-/*Protótipo de funções*/
+
+/*Protï¿½tipo de funï¿½ï¿½es*/
 void inicializarSerial(void);
 void ordenar(BlocoMem *vetorMem, int numBlocos);
 
 /******/
 
+//TODO:TESTE
+int getInt(){
+	i=0;
+	while(i<TAM_NUM){
+			if(PIR1bits.RCIF){				//Checa se foi registrador foi carregado
+				PIR1bits.RCIF = 0;			//Reinicializa Flag de recebimento
+				cbuffer = RCREG;				//Recebe dado
+				if(cbuffer == 0x0D){ 	//Checa se ï¿½ Enter
+					puts(CRLF);				//quebra linha
+          while(BusyUSART());
+					break;					//para iteracao
+				} else {
+				sbuffer[i++] = cbuffer;			//Poe na string para ser convertido
+				putcUSART(cbuffer);				//imprime
+        while(BusyUSART());
+				}	}	}
+   return atoi(sbuffer);
+}
 
-/*Função principal*/
+//TODO:FIM
+
+/*Funï¿½ï¿½o principal*/
 void main(void)
 {
-   
-    
+
+
     int numProcessosi = 0;
     int numBlocosi = 0;
     int tamTodosProcessosi = 0;
     int tamTodosBlocosi = 0;
-    
-    int i = 0, j = 0;  
-    
+
+    int i = 0, j = 0;
+
+
     char numProcessos[TAM_NUM];
     char numBlocos[TAM_NUM];
     char tamTodosProcessos[TAM_NUM];
     char tamTodosBlocos[TAM_NUM];
-    
+
     char valor[5] = "   \0";
     char valor2[5] = "   \0";
     char valor3[5] = "   \0";
 
-	//variáveis para ler e escrever na serial	
-    
 
-	//Iniciliza a serial
+
+	//TODO:Iniciliza a serial
 	inicializarSerial();
 
-	//Leitura do x buscado, pelo teclado.
-	putsUSART(msgInicial);
-    
-    putsUSART(msgNumProcessos);
-    
-	while(!DataRdyUSART());
-	getsUSART(numProcessos, TAM_NUM);
-	putsUSART(numProcessos);
+	//TODO: INTRO +  mensagem -> numero de Processos
+  printf("\t\t%S%S%S", msgInicial, CRLF, msgNumProcessos);
+  while(BusyUSART());
 
-	//Conversão do x buscado para um valor int
-	numProcessosi = atoi(numProcessos);
-    
-    putsUSART(msgNumBlocos);
-    
+  //TODO:Le numero de Processos
+	numProcessosi = getInt();
+
+  //TODO:mensagem, le -> numero de BlocosDeMemoria
+  printf("%S",msgNumBlocos);
+  while(BusyUSART());
+
 	while(!DataRdyUSART());
 	getsUSART(numBlocos, TAM_NUM);
 	putsUSART(numBlocos);
 
-	//Conversão do x buscado para um valor int
+	//Conversï¿½o do x buscado para um valor int
 	numBlocosi = atoi(numBlocos);
-    
+
     if(numProcessosi > 5) {
-        
+
     putsUSART(msgTodosProcessos);
-    
+
 	while(!DataRdyUSART());
 	getsUSART(tamTodosProcessos, TAM_NUM);
 	putsUSART(tamTodosProcessos);
 
-	//Conversão do x buscado para um valor int
+	//Conversï¿½o do x buscado para um valor int
 	tamTodosProcessosi = atoi(tamTodosProcessos);
-    
-    
-    
+
+
+
     putsUSART(msgTodosBlocos);
-    
+
 	while(!DataRdyUSART());
 	getsUSART(tamTodosBlocos, TAM_NUM);
 	putsUSART(tamTodosBlocos);
 
-	//Conversão do x buscado para um valor int
-	tamTodosBlocosi = atoi(tamTodosBlocos);        
-        
+	//Conversï¿½o do x buscado para um valor int
+	tamTodosBlocosi = atoi(tamTodosBlocos);
+
     } else {
-        
-         //até 5 Processos definindo as condicoes de cada parte,
-        
-        
+
+         //atï¿½ 5 Processos definindo as condicoes de cada parte,
+
+
         putsUSART(tamKdProcesso);
-     
+
         for(i=0;i<numProcessosi;i++) {
             putsUSART(processo);
-            valor[0] = i + 1 + '0'; //Conversão INT para CHAR           
+            valor[0] = i + 1 + '0'; //Conversï¿½o INT para CHAR
             putsUSART(valor);
-            
+
             while(!DataRdyUSART());
 	        getsUSART(valor, 1);
 	        putsUSART(valor);
-            
+
             tamProcessos[i] = atoi(valor);
         }
-      
-        putsUSART(tamKdBloco);
-        
 
-        
+        putsUSART(tamKdBloco);
+
+
+
 
         for(i=0;i<numBlocosi;i++) {
-            
+
             putsUSART(bloco);
-            valor2[0] = i + 1 + '0'; //Conversão INT para CHAR           
+            valor2[0] = i + 1 + '0'; //Conversï¿½o INT para CHAR
             putsUSART(valor2);
-            
+
             while(!DataRdyUSART());
 	        getsUSART(valor2, 1);
 	        putsUSART(valor2);
-            
-            vBlocoMem[i].tamanho = atoi(valor2);                 
+
+            vBlocoMem[i].tamanho = atoi(valor2);
             vBlocoMem[i].id = i+1;
-        }     
+        }
     }
-    
+
     ordenar(vBlocoMem, numBlocosi);
-    
+
     putsUSART(cabecalho);
-    
+
     for(i=0;i<numProcessosi;i++) {
 
-        //Varre vetor de blocos de memória ordenado descrescentemente
+        //Varre vetor de blocos de memï¿½ria ordenado descrescentemente
         for(j=0;j<numBlocosi;j++) {
 
             //Ha espaco?
             if(vBlocoMem[j].tamanho >= tamProcessos[i]){
                 //Imprime linha output
-              
+
                 putsUSART(t);
-                
+
                 itoa(i+1,valor3);
                 putsUSART(valor3);
-                
+
                 putsUSART(t);
                 putsUSART(t);
                 putsUSART(t);
                 putsUSART(t);
-                
+
                 itoa(tamProcessos[i],valor3);
                 putsUSART(valor3);
-                
+
                 putsUSART(t);
                 putsUSART(t);
                 putsUSART(t);
-                
+
                 itoa(vBlocoMem[j].id,valor3);
                 putsUSART(valor3);
-                
+
                 putsUSART(t);
                 putsUSART(t);
                 putsUSART(t);
-                
+
                itoa(vBlocoMem[j].tamanho,valor3);
                 putsUSART(valor3);
-                
+
                 putsUSART(t);
                 putsUSART(t);
                 putsUSART(t);
                 putsUSART(t);
                 putsUSART(t);
-                
+
                itoa(vBlocoMem[j].tamanho - tamProcessos[i],valor3);
                 putsUSART(valor3);
-                    
+
                 //Registra alteracao no tamanho do bloco
                 vBlocoMem[j].tamanho -= tamProcessos[i];
 
@@ -340,34 +366,34 @@ void main(void)
         }
         //Espaco nao encontrado
         if(j == numBlocosi){
-            
+
             putsUSART(t);
-            
+
             itoa(i+1,valor3);
             putsUSART(valor3);
-                
+
             putsUSART(t);
             putsUSART(t);
             putsUSART(t);
             putsUSART(t);
-            
+
             itoa(tamProcessos[i],valor3);
             putsUSART(valor3);
-            
+
             putsUSART(impossivel);
-            
+
             putsUSART(n);
         }
     }
-    
+
         return(0);
 
-    
-    
-    
-    
+
+
+
+
 /*
- 
+
  //###          Agosto/2015
 //### SEMB1 - Codigo executado no ARM9 linux
 //### Dupla: Franklin e Roland Gabriel
@@ -406,7 +432,7 @@ int main()
 
     //TODO: Condicional que define o modo de tratamento:
     if(numProcessos <= 5) {
-        //até 5 Processos definindo as condicoes de cada parte,
+        //atï¿½ 5 Processos definindo as condicoes de cada parte,
         printf("Entre com o tamanho dos Processos:\n");
         for(i=0;i<numProcessos;i++) {
             printf("Processo %d:",i+1);
@@ -435,7 +461,7 @@ int main()
     }
 //Fim de area de entrada de dados
 
-    //TODO: Ordenação inicial da memória
+    //TODO: Ordenaï¿½ï¿½o inicial da memï¿½ria
     ordenar(vBlocoMem, numBlocos);
     //Imprime cabecalho da lista output.
     printf("\nID Processo:\t Tamanho:\t ID Bloco:\tEspaco no Bloco:\tEspaco Restante:\n");
@@ -444,7 +470,7 @@ int main()
 //    Para cada processo.
     for(i=0;i<numProcessos;i++) {
 
-        //Varre vetor de blocos de memória ordenado descrescentemente
+        //Varre vetor de blocos de memï¿½ria ordenado descrescentemente
         for(j=0;j<numBlocos;j++) {
 
             //Ha espaco?
@@ -473,24 +499,24 @@ int main()
     return(0);
 
 }
- 
- */	
+
+ */
 
 }
 /*******/
 
-/*Configura e habilita a comunicação serial*/
+/*Configura e habilita a comunicaï¿½ï¿½o serial*/
 void inicializarSerial()
 {
 	RCSTAbits.SPEN = 1;
 	TRISCbits.TRISC7 = 1;
 	TRISCbits.TRISC6 = 1;
 	TXSTAbits.TXEN = 1;
-	RCSTAbits.CREN = 1;	
+	RCSTAbits.CREN = 1;
 
-	OpenUSART(	USART_TX_INT_OFF & 
-				USART_RX_INT_OFF & 
-				USART_ASYNCH_MODE & 
+	OpenUSART(	USART_TX_INT_OFF &
+				USART_RX_INT_OFF &
+				USART_ASYNCH_MODE &
 				USART_EIGHT_BIT &
 				USART_CONT_RX &
 				USART_BRGH_HIGH,51);
