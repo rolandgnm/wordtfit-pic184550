@@ -36,7 +36,7 @@ int tamanho;
 //TODO:Cria vetor de BlocoMem no setor configurado no Linker
 #pragma romdata vecBlocoMem=0x7300
     // volatile rom BlocoMem *vecBlocoMem;                      1
-    const rom BlocoMem vecBlocoMem[NUM_MAX_BLOCOS_MEM]={
+    volatile rom BlocoMem vecBlocoMem[NUM_MAX_BLOCOS_MEM]={
       {1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,
       {1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,
       {1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,
@@ -267,16 +267,24 @@ void main(void)
   //   vecBlocoMem[i]->tamanho=250;
   // }
 
-  memcpypgm2ram((BlocoMem *) &blocoMemAux , (BlocoMem *) vecBlocoMem + 300, sizeof(BlocoMem));
+
 
 	//TODO:Iniciliza a serial
 	inicializarSerial();
 
   // //TODO: testa prinf e acesso a memoria
+  // memcpypgm2ram((BlocoMem *) &blocoMemAux , (BlocoMem *) vecBlocoMem + 300, sizeof(BlocoMem));
   // if(blocoMemAux .id == 1) {
   //   printf("%S %d",processo, blocoMemAux.tamanho );
   //   while(BusyUSART());
   // }
+  //
+  // blocoMemAux.tamanho = 450;
+  // memcpyram2pgm((BlocoMem *) vecBlocoMem + 300, (BlocoMem *) &blocoMemAux, sizeof(BlocoMem));
+  // memcpypgm2ram((BlocoMem *) &blocoMemAux , (BlocoMem *) vecBlocoMem + 300, sizeof(BlocoMem));
+  //
+  // printf("MEMORIA %d %S%S", blocoMemAux.tamanho, CRLF, CRLF );
+
 
 	//TODO: USART out -> Introducao +  mensagem numero de Processos
   printf("\t\t%S%S%S", msgInicial, CRLF, msgNumProcessos);
@@ -295,6 +303,8 @@ void main(void)
 
     printf("%S", msgTodosProcessos);
     while(BusyUSART());
+
+    
 
     while(!DataRdyUSART());
     getsUSART(tamTodosProcessos, TAM_NUM);
@@ -471,6 +481,7 @@ void ordenar(BlocoMem *vetorMem, int numBlocos) {
 //TODO:Funcao facilita leitura de inteiros
 int getInt(){
 	int i=0;
+  int iReturn=0;
 	while(i<TAM_NUM){
 			if(PIR1bits.RCIF){				//Checa se foi registrador foi carregado
 				PIR1bits.RCIF = 0;			//Reinicializa Flag de recebimento
@@ -484,7 +495,7 @@ int getInt(){
 				}	}	}
   puts(CRLF);				//quebra linha
   while(BusyUSART());
-
+  iReturn = atoi(sbuffer);
   while(i>=0) sbuffer[i--] = '\0';
-  return atoi(sbuffer);
+  return iReturn;
 }
