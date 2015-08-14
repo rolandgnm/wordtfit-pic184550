@@ -17,8 +17,8 @@ LIBPATH .
 
 // #FI
 
-CODEPAGE   NAME=page       START=0x0               END=0x737F
-CODEPAGE   NAME=DADOS_ROM  START=0x7380            END=0x7FFF         PROTECTED //TODO: Section separada para vetor longo. 3200B
+CODEPAGE   NAME=page       START=0x0               END=0x7FFF
+// CODEPAGE   NAME=DADOS_ROM  START=0x7300            END=0x7FFF          //TODO: Section separada para vetor longo. 3200B
 CODEPAGE   NAME=idlocs     START=0x200000          END=0x200007       PROTECTED
 CODEPAGE   NAME=config     START=0x300000          END=0x30000D       PROTECTED
 CODEPAGE   NAME=devid      START=0x3FFFFE          END=0x3FFFFF       PROTECTED
