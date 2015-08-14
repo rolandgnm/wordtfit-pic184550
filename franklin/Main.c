@@ -177,31 +177,9 @@ const rom float y[VETOR_PRINCIPAL] =
 /*Prot�tipo de fun��es*/
 void inicializarSerial(void);
 void ordenar(BlocoMem *vetorMem, int numBlocos);
+int getInt();                                     //Funcao facilita leitura de inteiros
 
 /******/
-
-//TODO:TESTE
-int getInt(){
-	i=0;
-	while(i<TAM_NUM){
-			if(PIR1bits.RCIF){				//Checa se foi registrador foi carregado
-				PIR1bits.RCIF = 0;			//Reinicializa Flag de recebimento
-				cbuffer = RCREG;				//Recebe dado
-				if(cbuffer == 0x0D){ 	//Checa se � Enter
-					puts(CRLF);				//quebra linha
-          while(BusyUSART());
-					break;					//para iteracao
-				} else {
-				sbuffer[i++] = cbuffer;			//Poe na string para ser convertido
-				putcUSART(cbuffer);				//imprime
-        while(BusyUSART());
-				}	}	}
-   return atoi(sbuffer);
-}
-
-//TODO:FIM
-
-/*Fun��o principal*/
 void main(void)
 {
 
@@ -228,31 +206,25 @@ void main(void)
 	//TODO:Iniciliza a serial
 	inicializarSerial();
 
-	//TODO: INTRO +  mensagem -> numero de Processos
+	//TODO: USART out -> Introducao +  mensagem numero de Processos
   printf("\t\t%S%S%S", msgInicial, CRLF, msgNumProcessos);
   while(BusyUSART());
 
-  //TODO:Le numero de Processos
+  //TODO:USART in -> Le numero de Processos
 	numProcessosi = getInt();
 
-  //TODO:mensagem, le -> numero de BlocosDeMemoria
+  //TODO:USART out -> mensagem / in-> numero de BlocosDeMemoria
   printf("%S",msgNumBlocos);
   while(BusyUSART());
+  numBlocosi = getInt();
 
-	while(!DataRdyUSART());
-	getsUSART(numBlocos, TAM_NUM);
-	putsUSART(numBlocos);
 
-	//Convers�o do x buscado para um valor int
-	numBlocosi = atoi(numBlocos);
-
-    if(numProcessosi > 5) {
+  if(numProcessosi > 5) {
 
     putsUSART(msgTodosProcessos);
-
-	while(!DataRdyUSART());
-	getsUSART(tamTodosProcessos, TAM_NUM);
-	putsUSART(tamTodosProcessos);
+    while(!DataRdyUSART());
+    getsUSART(tamTodosProcessos, TAM_NUM);
+    putsUSART(tamTodosProcessos);
 
 	//Convers�o do x buscado para um valor int
 	tamTodosProcessosi = atoi(tamTodosProcessos);
@@ -534,4 +506,25 @@ void ordenar(BlocoMem *vetorMem, int numBlocos) {
             }
         }
     }
+}
+
+//TODO:Funcao facilita leitura de inteiros
+int getInt(){
+	int i=0;
+	while(i<TAM_NUM){
+			if(PIR1bits.RCIF){				//Checa se foi registrador foi carregado
+				PIR1bits.RCIF = 0;			//Reinicializa Flag de recebimento
+				cbuffer = RCREG;				//Recebe dado
+				if(cbuffer == 0x0D){ 	//Checa se � Enter
+					break;					//para iteracao
+				} else {
+				sbuffer[i++] = cbuffer;			//Poe na string para ser convertido
+				putcUSART(cbuffer);				//imprime
+        while(BusyUSART());
+				}	}	}
+  puts(CRLF);				//quebra linha
+  while(BusyUSART());
+
+  while(i>=0) sbuffer[i--] = '\0';
+  return atoi(sbuffer);
 }
