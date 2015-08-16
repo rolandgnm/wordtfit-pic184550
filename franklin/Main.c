@@ -20,10 +20,9 @@
 #pragma config STVREN   = ON
 #pragma config LVP      = OFF
 
-#define VETOR_PRINCIPAL 384
-#define NUM_MAX_BLOCOS_MEM 800
+#define NUM_MAX_BLOCOS_MEM 30
+#define NUM_MAX_PROCESSOS 30
 
-#define VETOR_AUXILIAR 6
 #define TAM_NUM 5
 #define CRLF "\r\n"
 
@@ -37,7 +36,7 @@ int tamanho;
 //TODO:Cria vetor de BlocoMem no setor configurado no Linker
 #pragma romdata vecBlocoMem=0x7300
     // volatile rom BlocoMem *vecBlocoMem;                      1
-    volatile rom BlocoMem vecBlocoMem[NUM_MAX_BLOCOS_MEM]={
+    volatile rom BlocoMem vecBlocoMem[800]={
       {1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,
       {1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,
       {1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,{1,1} ,
@@ -95,8 +94,8 @@ int tamanho;
 
 //TOTAL 1200                      TODO:PROVISORIO
 #pragma udata DADOS_U
-    int tamProcessos[100];
-    BlocoMem vBlocoMem[100];
+    int tamProcessos[NUM_MAX_PROCESSOS];
+    BlocoMem vBlocoMem[NUM_MAX_BLOCOS_MEM];
 #pragma udata
 
 
@@ -106,6 +105,12 @@ int tamanho;
     unsigned char cbuffer;
     unsigned char sbuffer[TAM_NUM];
 
+    int iNumProcessos = 0;
+    int iNumBlocos = 0;
+    int tamTodosProcessosi = 0;
+    int tamTodosBlocosi = 0;
+    BlocoMem blocoMemAux  = {0, 0};
+    int i = 0, j = 0;
 #pragma udata
 //int *p = tamProcessos;
 
@@ -116,7 +121,7 @@ const rom char msgNumBlocos[] = "Entre com o Numero de Blocos: ";
 const rom char msgTodosProcessos[] = "Entre com um tamanho para TODOS os Processos: ";
 const rom char msgTodosBlocos[] = "Entre com um tamanho para TODOS os Blocos: ";
 const rom char tamKdProcesso[] = "Entre com o tamanho dos Processos:";
-const rom char tamKdBloco[] = "Entre com o tamanho dos Blocos:";
+const rom char tamKdBloco[] = "Entre com o tamanho dos Blocos: ";
 const rom char processo[] = "Processo";
 const rom char bloco[] = "Bloco";
 const rom char cabecalho[] = "ID Processo:     Tamanho:     ID Bloco:     Espaco no Bloco:     Espaco Restante:\r\n";
@@ -242,24 +247,6 @@ void main(void)
 {
 
 
-    int iNumProcessos = 0;
-    int iNumBlocos = 0;
-    int tamTodosProcessosi = 0;
-    int tamTodosBlocosi = 0;
-    BlocoMem blocoMemAux  = {0, 0};
-    int i = 0, j = 0;
-
-
-    char numProcessos[TAM_NUM];
-    char numBlocos[TAM_NUM];
-    char tamTodosProcessos[TAM_NUM];
-    char tamTodosBlocos[TAM_NUM];
-
-    char valor[5] = "   ";
-    char valor2[5] = "   ";
-    char valor3[5] = "   ";
-
-
   //TODO: Iniciliza vetor com zeros
   // memsetpgm(vecBlocoMem, 0x00, 800 * sizeof(BlocoMem));
   // for(i=0; i<800;i++){
@@ -267,8 +254,6 @@ void main(void)
   //   vecBlocoMem[i]->id= i+1;
   //   vecBlocoMem[i]->tamanho=250;
   // }
-
-
 
 	//TODO:Iniciliza a serial
 	inicializarSerial();
@@ -318,25 +303,24 @@ void main(void)
 
     } else {
 
-         //at� 5 Processos definindo as condicoes de cada parte,
+         //ate 5 Processos definindo as condicoes de cada parte,
 
 
-        printf("%S", tamKdProcesso);
+        printf("%S%S", tamKdProcesso, CRLF);
         while(BusyUSART());
 
         for(i=0;i<iNumProcessos;i++) {
-            printf("%S %d",processo, i+1);
+            printf("%S %d: ",processo, i+1);
             while(BusyUSART());
-
             tamProcessos[i] = getInt();
         }
 
-        printf("%S",tamKdBloco);
+        printf("%S%S",tamKdBloco, CRLF);
 
 
         for(i=0;i<iNumBlocos;i++) {
 
-            printf("%S %d",bloco, i+1);
+            printf("%S %d: ",bloco, i+1);
 
             vBlocoMem[i].tamanho = getInt();
             vBlocoMem[i].id = i+1;
@@ -356,20 +340,21 @@ void main(void)
             if(vBlocoMem[j].tamanho >= tamProcessos[i]){
                 //Imprime linha output
 
-                printf("     %d                    %d               %d               %d                         %d\r\n",i+1, tamProcessos[i], vBlocoMem[j].id, vBlocoMem[j].tamanho,
-                       (vBlocoMem[j].tamanho - tamProcessos[i]));
+                printf("     %d                    %d               %d               %d                         %d%S",i+1, tamProcessos[i], vBlocoMem[j].id, vBlocoMem[j].tamanho,
+                       (vBlocoMem[j].tamanho - tamProcessos[i]),CRLF);
+               while(BusyUSART());
                 //Registra alteracao no tamanho do bloco
                 vBlocoMem[j].tamanho -= tamProcessos[i];
 
                 //TODO: Reordena o vetor de BlocosMem.
-                ordenar(vBlocoMem,numBlocos);
+                ordenar(vBlocoMem, iNumBlocos);
                 break;
             }
         }
         //Espaco nao encontrado
         if(j == iNumBlocos){
 
-          printf("     %d                    %d      IMPOSSIVEL ALOCAR\n",i+1, tamProcessos[i]);
+          printf("     %d                    %d      %S%S",i+1, tamProcessos[i],impossivel, CRLF);
         }
     }
         printf("\r\n\r\n\r\n" );
