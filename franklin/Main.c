@@ -291,6 +291,8 @@ void main(void)
     while(BusyUSART());
 
     tamTodosProcessosi = getInt();
+    for(i=0;i<iNumProcessos;i++) tamProcessos[i] = tamTodosProcessosi;
+
 
     printf("%S", CRLF); //new line
     while(BusyUSART());
@@ -300,6 +302,11 @@ void main(void)
     while(BusyUSART());
 
     tamTodosBlocosi = getInt();
+    for(i=0;i<iNumBlocos;i++) {
+        vBlocoMem[i].tamanho = tamTodosBlocosi;
+        vBlocoMem[i].id = i+1;
+    }
+
 
     } else {
 
@@ -316,12 +323,11 @@ void main(void)
         }
 
         printf("%S%S",tamKdBloco, CRLF);
-
+        while(BusyUSART());
 
         for(i=0;i<iNumBlocos;i++) {
-
             printf("%S %d: ",bloco, i+1);
-
+            while(BusyUSART());
             vBlocoMem[i].tamanho = getInt();
             vBlocoMem[i].id = i+1;
         }
@@ -358,7 +364,7 @@ void main(void)
         }
     }
         printf("\r\n\r\n\r\n" );
-        return(0);
+        while(1);
 
 }
 /*******/
