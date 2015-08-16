@@ -32,7 +32,7 @@
 *.cof
 *.hex
 *.map
-*.mcp
+#*.mcp
 *.mcs
 *.mcw
 *.err
