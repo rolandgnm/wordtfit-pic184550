@@ -203,6 +203,9 @@ void main(void)
     // Ordena vetor de Blocos de Memória de modo a ter
     // Maior posição na primeira posição.
     // %%%%% , %%%% , %%% , %% , %
+    // obs: Desse ponto em diante creditamos o usuário
+    // JoeVogel @ Github pela disponibilidade da lógica
+    // usada em Java, que foi adaptada para C e depois PIC.
     ordenarDecrescente(vBlocoMem, iNumBlocos);
 
     // "ID Processo:     Tamanho:     ID Bloco:     Espaco no Bloco:     Espaco Restante: "
