@@ -1,6 +1,18 @@
-/*###          Agosto/2015
+/*###
+  ###         Agosto/2015
   ### SEMB1 - Worst-fit portado para PIC18F4550
   ### Dupla: Franklin e Roland Gabriel
+  ###
+  ### Principais estruturas:
+  ### - Vetor Tamanho de procesos
+  ### - Vetor de estruturas de int
+  ###     equivalendo a espaço de um float.
+  ###
+  ### O programa aloca os processos de forma simbólica
+  ### atribuindo valores resultado de subtração para
+  ### cada bloco de memória.
+  ### A alocação acontece sempre no bloco de memória que
+  ### que terá maior espaço livre após a alocação.
   ###
   ###
 */
@@ -208,31 +220,39 @@ void main(void)
             // Há espaço?
             if(vBlocoMem[j].tamanho >= tamProcessos[i]){
                 // Imprime linha output
-                //
+                // "1      250       1      300        50"
                 printf("     %d                    %d               %d               %d                         %d%S",i+1, tamProcessos[i], vBlocoMem[j].id, vBlocoMem[j].tamanho,
                        (vBlocoMem[j].tamanho - tamProcessos[i]),CRLF);
                while(BusyUSART());
+
                 //Registra alteracao no tamanho do bloco
                 vBlocoMem[j].tamanho -= tamProcessos[i];
 
-                //TODO: Reordena o vetor de BlocosMem.
+                // Reordena o vetor de BlocosMem.
                 ordenarDecrescente(vBlocoMem, iNumBlocos);
                 break;
             }
         }
-        //Espaco nao encontrado
-        if(j == iNumBlocos){
 
+        // Não há espaço em nenhum bloco para aquele processo.
+        // Confirma que chegou ao fim do vetor.
+        if(j == iNumBlocos){
+          // "5        20         IMPOSSIVEL ALOCAR"
           printf("     %d                    %d      %S%S",i+1, tamProcessos[i],impossivel, CRLF);
         }
     }
-        printf("\r\n\r\n\r\n" );
-        while(1);
+
+    //Encerra programa.
+    printf("\r\n\r\n\r\n" );
+    while(1);
 
 }
-/*******/
+// Fim de main()
 
-//TODO:Configura USART
+
+
+
+// Configura USART
 void inicializarSerial()
 {
 	RCSTAbits.SPEN = 1;
@@ -249,7 +269,9 @@ void inicializarSerial()
 				USART_BRGH_HIGH,51);
 }
 
-//TODO: Metodo de Ordenacao
+// Metodo de Ordenacao
+// Devido a nossa dificuldade com configurações iniciais
+// permenece método de ordenação prévio.
 void ordenarDecrescente(BlocoMem *vetorMem, int numBlocos) {
     int i,j;
     for (i = 0; i < numBlocos; i++) {
@@ -266,21 +288,21 @@ void ordenarDecrescente(BlocoMem *vetorMem, int numBlocos) {
 //TODO:Funcao facilita leitura de inteiros
 int getInt(){
 	int i=0;
-  int iReturn=0;
-	while(i<TAM_NUM){
-			if(PIR1bits.RCIF){				//Checa se foi registrador foi carregado
-				PIR1bits.RCIF = 0;			//Reinicializa Flag de recebimento
-				cbuffer = RCREG;				//Recebe dado
-				if(cbuffer == 0x0D){ 	//Checa se � Enter
-					break;					//para iteracao
+  int iReturn=0;                  //inteiro a ser retornado.
+	while(i<TAM_NUM){               // Atende ao buffer de 5 char
+			if(PIR1bits.RCIF){				  //Checa se foi registrador foi carregado
+				PIR1bits.RCIF = 0;			  //Reinicializa Flag de recebimento
+				cbuffer = RCREG;				  //Recebe dado
+				if(cbuffer == 0x0D){ 	    //Checa se foi ENTER
+					break;					        //para iteracao
 				} else {
-				sbuffer[i++] = cbuffer;			//Poe na string para ser convertido
+				sbuffer[i++] = cbuffer;		//Poe na string para ser convertido
 				putcUSART(cbuffer);				//imprime
         while(BusyUSART());
 				}	}	}
-  puts(CRLF);				//quebra linha
+  puts(CRLF);				              //quebra linha
   while(BusyUSART());
-  iReturn = atoi(sbuffer);
-  while(i>=0) sbuffer[i--] = '\0';
+  iReturn = atoi(sbuffer);        //Armazena return
+  while(i>=0) sbuffer[i--] = '\0';//limpa para uso futuro
   return iReturn;
 }
