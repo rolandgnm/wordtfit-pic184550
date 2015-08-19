@@ -1,41 +1,38 @@
-// File: 18f4550_g.lkr
-// Generic linker script for the PIC18F4550 processor
+//Equioe: Franklin e Gabriel.
+// File: 18f4550_g.lkr.
+// # Introdução #
+// Linker customizado para o nosso uso no projeto.
+// As modificações acontecem na linha 27, quando
+// definimos uma única página de memória de dados,
+// com a palavra reservada 'DATABANK' e nome DADOS_U
+// de usuáriio, para que possamos alocar os vetores
+// necessarios para a computação.
+//
+// Na linha 36, de modo a não precisa alocar uma
+// página para controle de memória de dados externa
+// setamos esse setor para ser o nosso DATABANK
+// DADOS_U já que não há uso de memória externa.
+
 
 LIBPATH .
 
-// #IFDEF _CRUNTIME
-//   #IFDEF _EXTENDEDMODE
-//     FILES c018i_e.o
-//     FILES clib_e.lib
-//     FILES p18f4550_e.lib
-//
-//   #ELSE
     FILES c018i.o
     FILES clib.lib
     FILES p18f4550.lib
-  // #FI
-
-// #FI
 
 CODEPAGE   NAME=page       START=0x0               END=0x7FFF
-// CODEPAGE   NAME=DADOS_ROM  START=0x7300            END=0x7FFF          //TODO: Section separada para vetor longo. 3200B
 CODEPAGE   NAME=idlocs     START=0x200000          END=0x200007       PROTECTED
 CODEPAGE   NAME=config     START=0x300000          END=0x30000D       PROTECTED
 CODEPAGE   NAME=devid      START=0x3FFFFE          END=0x3FFFFF       PROTECTED
 CODEPAGE   NAME=eedata     START=0xF00000          END=0xF000FF       PROTECTED
 
-// #IFDEF _EXTENDEDMODE
-//   DATABANK   NAME=gpre       START=0x0               END=0x5F
-// #ELSE
+// Área de acesso rápido, reservado para uso de variáveis
+// para uso recorrente. 
 ACCESSBANK NAME=accessram  START=0x0               END=0x5F
-// #FI
 
-DATABANK   NAME=gpr0       START=0x60              END=0xFF
+// Definição da página customizada.
+DATABANK  NAME=DADOS_U  START=0x060  END=0x7FF
 
-DATABANK  NAME=DADOS_U  START=0x100  END=0x5B1  
-
-DATABANK   NAME=gpr2       START=0x5B2             END=0x6FF
-DATABANK   NAME=gpr3       START=0x700             END=0x7FF
 ACCESSBANK NAME=accesssfr  START=0xF60             END=0xFFF          PROTECTED
 
 #IFDEF _CRUNTIME
@@ -44,6 +41,7 @@ ACCESSBANK NAME=accesssfr  START=0xF60             END=0xFFF          PROTECTED
   #IFDEF _DEBUGSTACK
     STACK SIZE=0x100 RAM=gpr2
   #ELSE
-    STACK SIZE=0x100 RAM=gpr3
+    //Descarta página de controle de memória de dados externa.
+    STACK SIZE=0x100 RAM=DADOS_U
   #FI
 #FI
