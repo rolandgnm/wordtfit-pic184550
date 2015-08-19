@@ -221,7 +221,7 @@ void main(void)
             if(vBlocoMem[j].tamanho >= tamProcessos[i]){
                 // Imprime linha output
                 // "1      250       1      300        50"
-                printf("     %d                    %d               %d               %d                         %d%S",i+1, tamProcessos[i], vBlocoMem[j].id, vBlocoMem[j].tamanho,
+                printf("     %d              %d            %d               %d                    %d%S",i+1, tamProcessos[i], vBlocoMem[j].id, vBlocoMem[j].tamanho,
                        (vBlocoMem[j].tamanho - tamProcessos[i]),CRLF);
                while(BusyUSART());
 
