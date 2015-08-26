@@ -209,8 +209,8 @@ void main(void)
     ordenarDecrescente(vBlocoMem, iNumBlocos);
 
     // "ID Processo:     Tamanho:     ID Bloco:     Espaco no Bloco:     Espaco Restante: "
-    printf("%S%S", cabecalho, CRLF);
-    while(BusyUSART());
+//    printf("%S%S", cabecalho, CRLF);
+//    while(BusyUSART());
 
     // Para cada Processo
     for(i=0;i<iNumProcessos;i++) {
@@ -224,9 +224,9 @@ void main(void)
             if(vBlocoMem[j].tamanho >= tamProcessos[i]){
                 // Imprime linha output
                 // "1      250       1      300        50"
-                printf("     %d              %d            %d               %d                    %d%S",i+1, tamProcessos[i], vBlocoMem[j].id, vBlocoMem[j].tamanho,
-                       (vBlocoMem[j].tamanho - tamProcessos[i]),CRLF);
-               while(BusyUSART());
+//                printf("     %d              %d            %d               %d                    %d%S",i+1, tamProcessos[i], vBlocoMem[j].id, vBlocoMem[j].tamanho,
+//                       (vBlocoMem[j].tamanho - tamProcessos[i]),CRLF);
+//               while(BusyUSART());
 
                 //Registra alteracao no tamanho do bloco
                 vBlocoMem[j].tamanho -= tamProcessos[i];
@@ -241,12 +241,12 @@ void main(void)
         // Confirma que chegou ao fim do vetor.
         if(j == iNumBlocos){
           // "5        20         IMPOSSIVEL ALOCAR"
-          printf("     %d                    %d      %S%S",i+1, tamProcessos[i],impossivel, CRLF);
+//          printf("     %d                    %d      %S%S",i+1, tamProcessos[i],impossivel, CRLF);
         }
     }
 
     //Encerra programa.
-    printf("\r\n\r\n\r\n" );
+    printf("!!! Programa Encerrado !!!" );
     while(1);
 
 }
