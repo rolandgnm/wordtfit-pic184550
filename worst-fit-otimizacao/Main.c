@@ -14,6 +14,10 @@
   ### A alocação acontece sempre no bloco de memória que
   ### que terá maior espaço livre após a alocação.
   ###
+  ###       Referências:
+  ### Worst-fit: http://github.com/JoeVogel/Java-WorstFit
+  ### shellSortDESC: http://rosettacode.org/wiki/Sorting_algorithms/Shell_sort#C
+  ###   com simples alteração para tornar Decrescente.
   ###
 */
 
@@ -38,7 +42,7 @@
 
 // Limita a alocação de memória
 #define NUM_MAX_BLOCOS_MEM 270
-#define NUM_PROCESSOS_MODO_INTERATIVO 5 //Altrado para apenas trabalhar em modo INTERATIVO
+#define NUM_PROCESSOS_MODO_INTERATIVO 5 //Alterado para apenas trabalhar em modo INTERATIVO
 
 // Tamanho maximo para buffer de entrada do teclado,
 // suposto a aceitar entradas de até 5 algarismos,
@@ -104,10 +108,11 @@ const rom char impossivel[] = " IMPOSSIVEL ALOCAR";
 
 // Protótipos de funções definidas após a main()
 void inicializarSerial(void);                       // configura pinagem para habilitar USART.
-void ordenarDecrescente(BlocoMem *vetorMem, int numBlocos);    // função para ordenar vetor de bloco de memória.
+/*OBSOLETO!*/void ordenarDecrescente(BlocoMem *vetorMem, int numBlocos); /*OBSOLETO!*/    // função para ordenar vetor de bloco de memória.
 int getInt();                                       //Facilita leitura de inteiros a partir da USART
 void alocarModoInterativo(); //Metodo que aloca processos ao modo original.
 void alocarModoLote(); //Metodo que descarta uso de vetor para Processos.
+void shellSortDESC(BlocoMem *a, int n);
 
 void main(void)
 {
@@ -206,7 +211,7 @@ void main(void)
     alocarModoLote();
 
   } else {
-    ordenarDecrescente(vBlocoMem, iNumBlocos);
+    shellSortDESC(vBlocoMem, iNumBlocos);
     alocarModoInterativo();
   }
 
@@ -301,7 +306,7 @@ void alocarModoInterativo () {
               vBlocoMem[j].tamanho -= tamProcessos[i];
 
               // Reordena o vetor de BlocosMem.
-              ordenarDecrescente(vBlocoMem, iNumBlocos);
+              shellSortDESC(vBlocoMem, iNumBlocos);
               break;
           }
       }
@@ -323,7 +328,7 @@ void alocarModoLote () {
   // Para cada Processo
   for(i=0;i<iNumProcessos;i++) {
 
-      // Percorre vetor de blocos a procura do maior espaço eestante após a alocação.
+      // Percorre vetor de blocos a procura do maior espaço restante após a alocação.
       // Melhor caso: Posição inicial conterá maior espaço após alocacção.
       // Pior cas0: Não há espaço para o Processo. Percorre todo o vetor de blocos.
       for(j=0;j<iNumBlocos;j++) {
@@ -340,7 +345,7 @@ void alocarModoLote () {
               vBlocoMem[j].tamanho -= iTamTodosProcessos;
 
               // Reordena o vetor de BlocosMem.
-              ordenarDecrescente(vBlocoMem, iNumBlocos);
+              shellSortDESC(vBlocoMem, iNumBlocos);
               break;
           }
       }
@@ -352,4 +357,18 @@ void alocarModoLote () {
          printf("     %d                    %d      %S%S",i+1, iTamTodosProcessos,impossivel, CRLF);
       }
   }
+}
+
+void shellSortDESC (BlocoMem *a, int n) {
+    int h, i, j;
+    BlocoMem t;
+    for (h = n; h /= 2;) {
+        for (i = h; i < n; i++) {
+            t = a[i];
+            for (j = i; j >= h && t.tamanho > a[j - h].tamanho; j -= h) {
+                a[j] = a[j - h];
+            }
+            a[j] = t;
+        }
+    }
 }
