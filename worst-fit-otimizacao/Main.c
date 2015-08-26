@@ -86,7 +86,36 @@ int tamanho;
     int iTamTodosProcessos = 0;         // tamanhos para casos em lote.
     int iTamTodosBlocos = 0;            //              //
     int i = 0, j = 0;                   // iteradores.
+    int counter = 0;                    // contadores
+    int counter2 = 0;
 #pragma udata
+
+    
+#pragma code high_vector=0x08
+  void interrupt_at_high_vector(void) {
+    _asm goto high_isr _endasm
+      }
+#pragma code
+  
+#pragma interrupt high_isr
+  void high_isr(void) {
+       if(INTCONbits.TMR0IF) {                // Timer 0 .. 
+           
+           TMR0H =  0x00;           
+           TMR0L =  0x06;
+           
+          INTCONbits.TMR0IF=0;                    // clear bit IRQ
+  
+          counter++;
+          
+          if(counter == 99) {
+              counter = 0;
+              counter2++;  
+          }        //if timer...
+    }
+  }
+#pragma code
+
 
 // Armazena Strings em memoria de programa
 const rom char msgInicial[] = "###   Alocacao de Memoria - Worst Fit   ###";
@@ -110,6 +139,12 @@ int getInt();                                       //Facilita leitura de inteir
 void main(void)
 {
 
+    RCONbits.IPEN = 1;
+    INTCONbits.GIE = 1;
+    
+    INTCONbits.TMR0IE = 1;
+    INTCON2bits.TMR0IP = 1;
+    
 
 	// Iniciliza a serial
 	inicializarSerial();
@@ -206,6 +241,9 @@ void main(void)
     // obs: Desse ponto em diante creditamos o usuário
     // JoeVogel @ Github pela disponibilidade da lógica
     // usada em Java, que foi adaptada para C e depois PIC.
+    
+    iniciaContador();
+    
     ordenarDecrescente(vBlocoMem, iNumBlocos);
 
     // "ID Processo:     Tamanho:     ID Bloco:     Espaco no Bloco:     Espaco Restante: "
@@ -246,6 +284,7 @@ void main(void)
     }
 
     //Encerra programa.
+    printf("%d.%d Segundos\n", counter2, counter);
     printf("!!! Programa Encerrado !!!" );
     while(1);
 
@@ -308,4 +347,23 @@ int getInt(){
   iReturn = atoi(sbuffer);        //Armazena return
   while(i>=0) sbuffer[i--] = '\0';//limpa para uso futuro
   return iReturn;
+}
+
+void iniciaContador() {
+    
+   T0CONbits.T08BIT = 1;   // 0 = 16 bit mode, 1 = 8 bit mode
+   T0CONbits.T0CS = 0;     // Clock Source: 0 = Fcy, 1 = pulses on T0CKI pin
+   T0CONbits.T0SE = 0;     // Select Edge: 0 =  low to high, 1 = high to low
+   T0CONbits.PSA = 0;      // 1 = bypass the prescaler. 0 = prescaler per the T0PS2:0 bits
+   T0CONbits.T0PS2 = 1;  // Prescaler Selection: 000 = 2, 001 = 4, 
+   T0CONbits.T0PS1 = 0;  //  010 = 8, 011 = 16, 100 = 32, 
+   T0CONbits.T0PS0 = 1;  // 101 = 64, 110= 128, 111 = 256
+   
+   TMR0H =  0x00;           
+   TMR0L =  0x63;
+   
+   INTCONbits.TMR0IF = 0; // reset the interrupt flag
+   
+   T0CONbits.TMR0ON = 1;   // 0 = turn timer off, 1 = turn timer on
+      
 }
