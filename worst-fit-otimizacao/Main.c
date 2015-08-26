@@ -107,6 +107,7 @@ void inicializarSerial(void);                       // configura pinagem para ha
 void ordenarDecrescente(BlocoMem *vetorMem, int numBlocos);    // função para ordenar vetor de bloco de memória.
 int getInt();                                       //Facilita leitura de inteiros a partir da USART
 void alocarModoInterativo(); //Metodo que aloca processos ao modo original.
+void alocarModoLote(); //Metodo que descarta uso de vetor para Processos.
 
 void main(void)
 {
@@ -202,13 +203,11 @@ void main(void)
     //## Fim de entrada, início da computação ##
 
   if (iNumBlocos > 5) {
+    alocarModoLote();
 
   } else {
     ordenarDecrescente(vBlocoMem, iNumBlocos);
     alocarModoInterativo();
-    while (1) {
-      /* code */
-    }
   }
 
 
@@ -312,6 +311,45 @@ void alocarModoInterativo () {
       if(j == iNumBlocos){
         // "5        20         IMPOSSIVEL ALOCAR"
          printf("     %d                    %d      %S%S",i+1, tamProcessos[i],impossivel, CRLF);
+      }
+  }
+}
+
+void alocarModoLote () {
+  // "ID Processo:     Tamanho:     ID Bloco:     Espaco no Bloco:     Espaco Restante: "
+   printf("%S%S", cabecalho, CRLF);
+   while(BusyUSART());
+
+  // Para cada Processo
+  for(i=0;i<iNumProcessos;i++) {
+
+      // Percorre vetor de blocos a procura do maior espaço eestante após a alocação.
+      // Melhor caso: Posição inicial conterá maior espaço após alocacção.
+      // Pior cas0: Não há espaço para o Processo. Percorre todo o vetor de blocos.
+      for(j=0;j<iNumBlocos;j++) {
+
+          // Há espaço?
+          if(vBlocoMem[j].tamanho >= iTamTodosProcessos){
+              // Imprime linha output
+              // "1      250       1      300        50"
+               printf("     %d              %d            %d               %d                    %d%S",i+1, iTamTodosProcessos, vBlocoMem[j].id, vBlocoMem[j].tamanho,
+                      (vBlocoMem[j].tamanho - iTamTodosProcessos),CRLF);
+              while(BusyUSART());
+
+              //Registra alteracao no tamanho do bloco
+              vBlocoMem[j].tamanho -= iTamTodosProcessos;
+
+              // Reordena o vetor de BlocosMem.
+              ordenarDecrescente(vBlocoMem, iNumBlocos);
+              break;
+          }
+      }
+
+      // Não há espaço em nenhum bloco para aquele processo.
+      // Confirma que chegou ao fim do vetor.
+      if(j == iNumBlocos){
+        // "5        20         IMPOSSIVEL ALOCAR"
+         printf("     %d                    %d      %S%S",i+1, iTamTodosProcessos,impossivel, CRLF);
       }
   }
 }
