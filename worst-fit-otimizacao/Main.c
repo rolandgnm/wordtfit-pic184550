@@ -38,7 +38,7 @@
 
 // Limita a alocação de memória
 #define NUM_MAX_BLOCOS_MEM 270
-#define NUM_MAX_PROCESSOS 270
+#define NUM_PROCESSOS_MODO_INTERATIVO 5 //Altrado para apenas trabalhar em modo INTERATIVO
 
 // Tamanho maximo para buffer de entrada do teclado,
 // suposto a aceitar entradas de até 5 algarismos,
@@ -71,7 +71,7 @@ int tamanho;
 // No arquivo .LKR há mais comentários
 // acerca da configuração de memória de dados.
 #pragma udata DADOS_U
-    int tamProcessos[NUM_MAX_PROCESSOS];
+    int tamProcessos[NUM_PROCESSOS_MODO_INTERATIVO]; //Passa a ser usado apenas em modo Interativo
     BlocoMem vBlocoMem[NUM_MAX_BLOCOS_MEM];
 #pragma udata
 
@@ -83,7 +83,7 @@ int tamanho;
     unsigned char sbuffer[TAM_NUM];     // buffer para vetor de char.
     int iNumProcessos = 0;              // guarda número de processos.
     int iNumBlocos = 0;                 // guarda número de blocos de memória.
-    int iTamTodosProcessos = 0;         // tamanhos para casos em lote.
+    int iTamTodosProcessos = 0;         // tamanhos para casos em lote.         OBS: Passa a Guardar o valor para todos os Processos
     int iTamTodosBlocos = 0;            //              //
     int i = 0, j = 0;                   // iteradores.
 #pragma udata
@@ -106,6 +106,7 @@ const rom char impossivel[] = " IMPOSSIVEL ALOCAR";
 void inicializarSerial(void);                       // configura pinagem para habilitar USART.
 void ordenarDecrescente(BlocoMem *vetorMem, int numBlocos);    // função para ordenar vetor de bloco de memória.
 int getInt();                                       //Facilita leitura de inteiros a partir da USART
+void alocarModoInterativo(); //Metodo que aloca processos ao modo original.
 
 void main(void)
 {
@@ -146,8 +147,8 @@ void main(void)
       iTamTodosProcessos = getInt();
 
       //Itera atribuição de tamanho para cada posição
-      // do vetor de tamanho de procesos.
-      for(i=0;i<iNumProcessos;i++) tamProcessos[i] = iTamTodosProcessos;
+      // do vetor de tamanho de procesos.            OBS: Valor será persistido em variável única e utilizado no momento e alocação.
+      // for(i=0;i<iNumProcessos;i++) tamProcessos[i] = iTamTodosProcessos;
 
       //Quebra de linha simples.
       printf("%S", CRLF); //new line
@@ -200,50 +201,16 @@ void main(void)
 
     //## Fim de entrada, início da computação ##
 
-    // Ordena vetor de Blocos de Memória de modo a ter
-    // Maior posição na primeira posição.
-    // %%%%% , %%%% , %%% , %% , %
-    // obs: Desse ponto em diante creditamos o usuário
-    // JoeVogel @ Github pela disponibilidade da lógica
-    // usada em Java, que foi adaptada para C e depois PIC.
+  if (iNumBlocos > 5) {
+
+  } else {
     ordenarDecrescente(vBlocoMem, iNumBlocos);
-
-    // "ID Processo:     Tamanho:     ID Bloco:     Espaco no Bloco:     Espaco Restante: "
-//    printf("%S%S", cabecalho, CRLF);
-//    while(BusyUSART());
-
-    // Para cada Processo
-    for(i=0;i<iNumProcessos;i++) {
-
-        // Percorre vetor de blocos a procura do maior espaço eestante após a alocação.
-        // Melhor caso: Posição inicial conterá maior espaço após alocacção.
-        // Pior cas0: Não há espaço para o Processo. Percorre todo o vetor de blocos.
-        for(j=0;j<iNumBlocos;j++) {
-
-            // Há espaço?
-            if(vBlocoMem[j].tamanho >= tamProcessos[i]){
-                // Imprime linha output
-                // "1      250       1      300        50"
-//                printf("     %d              %d            %d               %d                    %d%S",i+1, tamProcessos[i], vBlocoMem[j].id, vBlocoMem[j].tamanho,
-//                       (vBlocoMem[j].tamanho - tamProcessos[i]),CRLF);
-//               while(BusyUSART());
-
-                //Registra alteracao no tamanho do bloco
-                vBlocoMem[j].tamanho -= tamProcessos[i];
-
-                // Reordena o vetor de BlocosMem.
-                ordenarDecrescente(vBlocoMem, iNumBlocos);
-                break;
-            }
-        }
-
-        // Não há espaço em nenhum bloco para aquele processo.
-        // Confirma que chegou ao fim do vetor.
-        if(j == iNumBlocos){
-          // "5        20         IMPOSSIVEL ALOCAR"
-//          printf("     %d                    %d      %S%S",i+1, tamProcessos[i],impossivel, CRLF);
-        }
+    alocarModoInterativo();
+    while (1) {
+      /* code */
     }
+  }
+
 
     //Encerra programa.
     printf("!!! Programa Encerrado !!!" );
@@ -308,4 +275,43 @@ int getInt(){
   iReturn = atoi(sbuffer);        //Armazena return
   while(i>=0) sbuffer[i--] = '\0';//limpa para uso futuro
   return iReturn;
+}
+
+void alocarModoInterativo () {
+  // "ID Processo:     Tamanho:     ID Bloco:     Espaco no Bloco:     Espaco Restante: "
+   printf("%S%S", cabecalho, CRLF);
+   while(BusyUSART());
+
+  // Para cada Processo
+  for(i=0;i<iNumProcessos;i++) {
+
+      // Percorre vetor de blocos a procura do maior espaço eestante após a alocação.
+      // Melhor caso: Posição inicial conterá maior espaço após alocacção.
+      // Pior cas0: Não há espaço para o Processo. Percorre todo o vetor de blocos.
+      for(j=0;j<iNumBlocos;j++) {
+
+          // Há espaço?
+          if(vBlocoMem[j].tamanho >= tamProcessos[i]){
+              // Imprime linha output
+              // "1      250       1      300        50"
+               printf("     %d              %d            %d               %d                    %d%S",i+1, tamProcessos[i], vBlocoMem[j].id, vBlocoMem[j].tamanho,
+                      (vBlocoMem[j].tamanho - tamProcessos[i]),CRLF);
+              while(BusyUSART());
+
+              //Registra alteracao no tamanho do bloco
+              vBlocoMem[j].tamanho -= tamProcessos[i];
+
+              // Reordena o vetor de BlocosMem.
+              ordenarDecrescente(vBlocoMem, iNumBlocos);
+              break;
+          }
+      }
+
+      // Não há espaço em nenhum bloco para aquele processo.
+      // Confirma que chegou ao fim do vetor.
+      if(j == iNumBlocos){
+        // "5        20         IMPOSSIVEL ALOCAR"
+         printf("     %d                    %d      %S%S",i+1, tamProcessos[i],impossivel, CRLF);
+      }
+  }
 }
