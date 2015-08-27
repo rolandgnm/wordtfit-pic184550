@@ -90,27 +90,35 @@ int tamanho;
     int counter2 = 0;
 #pragma udata
 
-    
+// Protótipos de funções definidas após a main()
+void inicializarSerial(void);                       // configura pinagem para habilitar USART.
+void ordenarDecrescente(BlocoMem *vetorMem, int numBlocos);    // função para ordenar vetor de bloco de memória.
+int getInt(); //Facilita leitura de inteiros a partir da USART
+void iniciaContador(void);
+void interrupt_at_high_vector(void);
+void high_isr(void);
+
+
 #pragma code high_vector=0x08
   void interrupt_at_high_vector(void) {
     _asm goto high_isr _endasm
       }
 #pragma code
-  
+
 #pragma interrupt high_isr
   void high_isr(void) {
-       if(INTCONbits.TMR0IF) {                // Timer 0 .. 
-           
-           TMR0H =  0x00;           
+       if(INTCONbits.TMR0IF) {                // Timer 0 ..
+
+           TMR0H =  0x00;
            TMR0L =  0x06;
-           
+
           INTCONbits.TMR0IF=0;                    // clear bit IRQ
-  
+
           counter++;
-          
+
           if(counter == 99) {
               counter = 0;
-              counter2++;  
+              counter2++;
           }        //if timer...
     }
   }
@@ -131,20 +139,16 @@ const rom char cabecalho[] = "ID Processo:     Tamanho:     ID Bloco:     Espaco
 const rom char impossivel[] = " IMPOSSIVEL ALOCAR";
 
 
-// Protótipos de funções definidas após a main()
-void inicializarSerial(void);                       // configura pinagem para habilitar USART.
-void ordenarDecrescente(BlocoMem *vetorMem, int numBlocos);    // função para ordenar vetor de bloco de memória.
-int getInt();                                       //Facilita leitura de inteiros a partir da USART
 
 void main(void)
 {
 
     RCONbits.IPEN = 1;
     INTCONbits.GIE = 1;
-    
+
     INTCONbits.TMR0IE = 1;
     INTCON2bits.TMR0IP = 1;
-    
+
 
 	// Iniciliza a serial
 	inicializarSerial();
@@ -241,14 +245,14 @@ void main(void)
     // obs: Desse ponto em diante creditamos o usuário
     // JoeVogel @ Github pela disponibilidade da lógica
     // usada em Java, que foi adaptada para C e depois PIC.
-    
+
     iniciaContador();
-    
+
     ordenarDecrescente(vBlocoMem, iNumBlocos);
 
     // "ID Processo:     Tamanho:     ID Bloco:     Espaco no Bloco:     Espaco Restante: "
-//    printf("%S%S", cabecalho, CRLF);
-//    while(BusyUSART());
+//   printf("%S%S", cabecalho, CRLF);
+//   while(BusyUSART());
 
     // Para cada Processo
     for(i=0;i<iNumProcessos;i++) {
@@ -262,9 +266,9 @@ void main(void)
             if(vBlocoMem[j].tamanho >= tamProcessos[i]){
                 // Imprime linha output
                 // "1      250       1      300        50"
-//                printf("     %d              %d            %d               %d                    %d%S",i+1, tamProcessos[i], vBlocoMem[j].id, vBlocoMem[j].tamanho,
-//                       (vBlocoMem[j].tamanho - tamProcessos[i]),CRLF);
-//               while(BusyUSART());
+              //  printf("     %d              %d            %d               %d                    %d%S",i+1, tamProcessos[i], vBlocoMem[j].id, vBlocoMem[j].tamanho,
+              //         (vBlocoMem[j].tamanho - tamProcessos[i]),CRLF);
+              // while(BusyUSART());
 
                 //Registra alteracao no tamanho do bloco
                 vBlocoMem[j].tamanho -= tamProcessos[i];
@@ -279,7 +283,7 @@ void main(void)
         // Confirma que chegou ao fim do vetor.
         if(j == iNumBlocos){
           // "5        20         IMPOSSIVEL ALOCAR"
-//          printf("     %d                    %d      %S%S",i+1, tamProcessos[i],impossivel, CRLF);
+        //  printf("     %d                    %d      %S%S",i+1, tamProcessos[i],impossivel, CRLF);
         }
     }
 
@@ -350,20 +354,20 @@ int getInt(){
 }
 
 void iniciaContador() {
-    
+
    T0CONbits.T08BIT = 1;   // 0 = 16 bit mode, 1 = 8 bit mode
    T0CONbits.T0CS = 0;     // Clock Source: 0 = Fcy, 1 = pulses on T0CKI pin
    T0CONbits.T0SE = 0;     // Select Edge: 0 =  low to high, 1 = high to low
    T0CONbits.PSA = 0;      // 1 = bypass the prescaler. 0 = prescaler per the T0PS2:0 bits
-   T0CONbits.T0PS2 = 1;  // Prescaler Selection: 000 = 2, 001 = 4, 
-   T0CONbits.T0PS1 = 0;  //  010 = 8, 011 = 16, 100 = 32, 
+   T0CONbits.T0PS2 = 1;  // Prescaler Selection: 000 = 2, 001 = 4,
+   T0CONbits.T0PS1 = 0;  //  010 = 8, 011 = 16, 100 = 32,
    T0CONbits.T0PS0 = 1;  // 101 = 64, 110= 128, 111 = 256
-   
-   TMR0H =  0x00;           
+
+   TMR0H =  0x00;
    TMR0L =  0x63;
-   
+
    INTCONbits.TMR0IF = 0; // reset the interrupt flag
-   
+
    T0CONbits.TMR0ON = 1;   // 0 = turn timer off, 1 = turn timer on
-      
+
 }
