@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 // Limita a alocação de memória
 #define NUM_MAX_BLOCOS_MEM 270
@@ -91,6 +92,9 @@ int main(void)
       int i = 0, j = 0;                   // iteradores.
       int counter = 0;                    // contadores
       int counter2 = 0;
+      clock_t clkInicio, clkFim;
+      double exeTime;
+
 
 
 
@@ -187,7 +191,8 @@ int main(void)
     // JoeVogel @ Github pela disponibilidade da lógica
     // usada em Java, que foi adaptada para C e depois PIC.
 
-    //TODO iniciaContador();
+    //TODO Inicia Contador
+    clkInicio = clock();
 
     ordenarDecrescente(vBlocoMem, iNumBlocos);
 
@@ -227,10 +232,10 @@ int main(void)
     }
 
     //Encerra programa.
-    counter2 = counter2%100;
-    printf("%d.%d Segundos\n", counter2, counter);
+    clkFim = clock();
+    exeTime = (double)(clkFim - clkInicio) / CLOCKS_PER_SEC;
+    printf("%.6f Segundos\n", exeTime);
     printf("!!! Programa Encerrado !!!" );
-    while(1);
     return 0;
 
 }
