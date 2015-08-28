@@ -197,7 +197,7 @@ int main(void)
     ordenarDecrescente(vBlocoMem, iNumBlocos);
 
     // "ID Processo:     Tamanho:     ID Bloco:     Espaco no Bloco:     Espaco Restante: "
-  printf("%s%s", cabecalho, CRLF);
+  // printf("%s%s", cabecalho, CRLF);
 
     // Para cada Processo
     for(i=0;i<iNumProcessos;i++) {
@@ -211,8 +211,8 @@ int main(void)
             if(vBlocoMem[j].tamanho >= tamProcessos[i]){
                 // Imprime linha output
                 // "1      250       1      300        50"
-               printf("     %d              %d            %d               %d                    %d%s",i+1, tamProcessos[i], vBlocoMem[j].id, vBlocoMem[j].tamanho,
-                      (vBlocoMem[j].tamanho - tamProcessos[i]),CRLF);
+              //  printf("     %d              %d            %d               %d                    %d%s",i+1, tamProcessos[i], vBlocoMem[j].id, vBlocoMem[j].tamanho,
+                      // (vBlocoMem[j].tamanho - tamProcessos[i]),CRLF);
 
                 //Registra alteracao no tamanho do bloco
                 vBlocoMem[j].tamanho -= tamProcessos[i];
@@ -227,15 +227,15 @@ int main(void)
         // Confirma que chegou ao fim do vetor.
         if(j == iNumBlocos){
           // "5        20         IMPOSSIVEL ALOCAR"
-         printf("     %d                    %d      %s%s",i+1, tamProcessos[i],impossivel, CRLF);
+        //  printf("     %d                    %d      %s%s",i+1, tamProcessos[i],impossivel, CRLF);
         }
     }
 
     //Encerra programa.
     clkFim = clock();
     exeTime = (double)(clkFim - clkInicio) / CLOCKS_PER_SEC;
-    printf("%.6f Segundos\n", exeTime);
-    printf("!!! Programa Encerrado !!!" );
+    printf("%.9f Segundos\n", exeTime);
+    printf("!!! Programa Encerrado !!!\n\n" );
     return 0;
 
 }
