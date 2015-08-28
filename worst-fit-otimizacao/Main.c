@@ -288,7 +288,7 @@ void main(void)
     }
 
     //Encerra programa.
-    counter2 = counter2%100;
+    counter = counter%100;
     printf("%d.%d Segundos\n", counter2, counter);
     printf("!!! Programa Encerrado !!!" );
     while(1);
