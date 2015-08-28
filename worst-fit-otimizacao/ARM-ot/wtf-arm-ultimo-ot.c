@@ -175,13 +175,15 @@ int main(void)
 	}
 
     //## Fim de entrada, início da computação ##
-    //Inicia Contador
-  clkInicio = clock();
 
   if (iNumBlocos > 5) {
+    //Inicia Contador
+    clkInicio = clock();
     alocarModoLote();
 
   } else {
+    //Inicia Contador
+    clkInicio = clock();
     shellSortDESC(vBlocoMem, iNumBlocos);
     alocarModoInterativo();
   }
